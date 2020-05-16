@@ -1,0 +1,19 @@
+{% extends "ShopApp/base.html" %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='slim' %}
+
+
+{% block content %}
+<div class="container" style="padding-bottom:230px;">
+    <div class="jumbotron" style="background: linear-gradient(#403A3E, #BE5869);color:white;">
+    <form method="POST">
+        {% bootstrap_form form %}
+        {% csrf_token %}
+        <button type="submit" class = "btn btn-outline-warning" value="submit">Set Location</button>
+    </form>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,97 @@
+
+{% extends "ShopApp/base.html" %}
+{% load static %}
+{% load bootstrap4 %}
+{% load custom_actions %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='slim' %}
+{% block userstyle %}
+    <link rel="stylesheet" href="{% static "ShopApp/css/cart.css" %}"
+{% endblock userstyle %}
+
+
+{% block content %}
+    <div class="container contents">
+    
+    
+         
+        <div class="jumbotron">
+           
+           <h6>  {{ it.owner }}, would you wanna checkout and get delivered to {{ it.owner.location }} </h6>
+            <br>
+            
+            {% for item in it.items.all %}
+                <div class="row">
+                    <div class="col-5">
+                <h5> {{ item.product.product_name }} </h5>
+                <h7> Price: {{ item.product.price }} </h7>
+                    </div>
+                    <div class="col-3">
+                        <form action="{% url "ShopApp:setSize" pk=item.pk %}" method="GET">
+                        <div class="drop">
+                        <a class="btn btn-outline-secondary bu" data-toggle="">
+                                Size
+                        </a>
+                            <div class="dropdown-content">
+                        {% for si in size  %}
+                               
+                                <button class="btn btn-dark bu" value="{{ si.size }}" type="submit" name="size" class="btns">{{ si.size }}</button>
+                              
+                        {% endfor %}
+                            </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class = "col-4">
+                        <a class="btn btn-danger" href="{% url 'ShopApp:delete_from_cart' pk=item.pk %}" class="btns">Delete </a>
+                    </div>
+                </div>
+                <hr>
+                
+                {% empty %}
+                   
+                    <h2> oops ,No items in cart </h2>
+            {% endfor %}
+                
+            <br><br>
+            <div class="row">
+                <div class="col-8">
+             Total Price = {{ it.get_cart_total }} +<br>
+             Delivery    = 50 <br>
+             Final Price =  {{ it.get_cart_total|add:"50" }}
+                </div>
+                
+                {% if request.session.empty == 1 %} 
+                
+                {% else %}
+                <div class="col-2">
+                    <a class="btn btn-success" href="{% url "ShopApp:PlaceOrder" pk=it.pk %}" class="btns">Checkout</a>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+        
+        {% bootstrap_messages %}
+    </div>
+        
+    
+    
+
+    
+
+
+{% endblock content %}
+
+
+{% block userscript %}
+<script type="text/javascript" src="js/bootstrap/bootstrap-dropdown.js"></script>
+<script>
+     $(document).ready(function(){
+        $('.dropdown-toggle').dropdown()
+    });
+</script>
+<script src="{% static "ShopApp/js/jquery.min.js" %}" type="text/javascript"></script>
+<script src="{% static "ShopApp/js/bootstrap.min.js" %}" type="text/javascript"></script>
+{% endblock userscript %}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+
+<html>
+{% load static %}
+{% load bootstrap4 %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='slim' %}
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="stylesheet" href="{% static "ShopApp/css/base.css" %}">
+    
+    <title>{% block title %}Just Clothes{% endblock %}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    
+    {% block userstyle %}
+    
+    {% endblock userstyle %}
+    
+    
+
+  </head>
+
+  <body class="main">
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top bg-prime" >
+      <div class="container">
+        <a class="navbar-brand" href="/">JustClothes</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href={% url "ShopApp:home" %}>Home
+                <span class="sr-only">(current)</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="">About us</a>
+            </li>
+            
+              <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        
+                            {% if user.is_authenticated %}
+                            <a class="dropdown-item" href="{% url "ShopApp:signout" %}">Sign Out</a>
+                          {% else %}
+                            <a class="dropdown-item" href="{% url "ShopApp:signin" %}">Sign In</a>
+                            <a class="dropdown-item" href="{% url "ShopApp:signup" %}">Signup</a>
+                          {% endif %}
+                            
+                            <div class="dropdown-divider"></div>
+                            {% if user.is_authenticated %}<a class="dropdown-item" href="#">My Profile</a>{% endif %}
+
+                    </div>
+                </li>
+          </ul>
+            
+            <form class="form-inline my-2 my-lg-0 mr-4" action="{% url "ShopApp:search" %}">
+                <input class="form-control mr-sm-2" name="q" type="search" placeholder="Search" aria-label="Search">
+                <span class="input-group-btn">
+                <button class="btn btn-warning my-2 my-sm-0" id="rounded" type="submit">
+                <i class="material-icons">&#xe8b6;</i></button>
+                </span>
+            </form>
+           {% if user.is_authenticated %} 
+            <a href="{% url "ShopApp:my_cart" %}" class="btn btn-warning" id="rounded" ><i class="material-icons iconStyle">&#xe547;</i>
+             {% if request.session.count %} <span class="badge badge-danger" style="font-size:10px;">{{ request.session.count }}</span> {% endif %}
+            </a> 
+           {% endif %}
+        </div>
+      </div>
+    </nav>
+
+
+
+    <!-- ==================Page Content========================== -->
+    <div class="container">
+
+      <div class="row" style="z-index:5;">
+        {% if request.path != '/signup/' %}
+         {% if request.path != '/signin/' %}
+            {% if request.path != '/cart/' %}
+      
+        <div class="col-lg-3 ">
+          <br><br>
+          <div class="category">
+          
+          <h3 class="my-4">Categories</h3> 
+          <div class="list-group">
+              <div class="row">
+                {% for c in category %}
+                  <div class="col-6 col-lg-12"> 
+          <div id="category-button">  <a href="{% url "ShopApp:category_view" pk=c.pk %}"> {{ c.categories }}  </a></div>
+                  </div>
+                {% endfor %}
+                  
+                  
+              </div>
+            </div>
+           
+          </div>
+       {% bootstrap_messages %} 
+
+        </div>
+        
+        <!-- /.col-lg-3 -->
+        <div class="col-lg-9 mt-3">
+        {% endif %}
+       {% else %}
+       {% endif %}
+       {% else %}
+        <div class="col-lg-11 mt-3">
+        {% endif %}
+        
+        
+    {% block header %}{% endblock %}
+    
+
+            <br> <br> 
+            {% block content %}
+
+
+
+          
+          <!-- /.row -->
+             {% endblock %}
+
+        </div>
+        <!-- /.col-lg-9 -->
+
+      </div>
+      <!-- /.row -->
+
+    </div>
+    <!-- /.container -->
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark bg-prime" >
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Ecommerce Shop 2020</p>
+      </div>
+      <!-- /.container -->
+    </footer>
+
+   
+ <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+
+</html>

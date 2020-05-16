@@ -1,0 +1,96 @@
+.bg-prime {
+    background: linear-gradient(#0F2027, #203A43, #2C5364);
+}
+
+.main {
+    background: white;
+}
+
+#rounded {
+    height: 40px;
+}
+
+.iconStyle {
+    font-size: 5px;
+}
+
+.dropdown-menu a {
+    transition-duration: 0.3s;
+}
+
+.dropdown-menu a:hover {
+    background: rgb(221, 186, 69);
+    color: white;
+}
+
+.category {
+    background: #203A43;
+    padding: 20px 20px 20px 10px;
+    color: white;
+    border-radius: 0px 0px 3px 0px;
+    transition-duration: 0.8s;
+    text-align: center;
+    font-weight: 600;
+}
+
+.category:hover {
+    border-radius: 0px 0px 13px 15px;
+}
+
+#category-button a {
+    color: white;
+    text-decoration: none;
+    transition-duration: 0.3s;
+}
+
+#category-button a:hover {
+    font-size: 20px;
+}
+
+.col-lg-12 {
+    height: 40px;
+}
+
+.card {
+    box-shadow: 2px 2px 5px 3px grey;
+    transition-duration: 0.3s;
+}
+
+.card:hover {
+    box-shadow: 0px 0px 0px 0px grey;
+}
+
+.grad {
+    background: linear-gradient(#360033, #0b8793);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.img-magnifier-container {
+    position: relative;
+}
+
+.img-magnifier-glass {
+    position: absolute;
+    border: 3px solid #000;
+    cursor: none;
+    /*Set the size of the magnifier glass:*/
+    width: 300px;
+    height: 100px;
+}
+
+@media (max-width:992px) {
+    .category {
+        width: 100%;
+    }
+    .img-magnifier-glass {
+        position: absolute;
+        border: 0px solid #000;
+        cursor: auto;
+        /*Set the size of the magnifier glass:*/
+        width: 0px;
+        height: 0px;
+    }
+}

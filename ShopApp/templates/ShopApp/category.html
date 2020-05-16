@@ -1,0 +1,44 @@
+{% extends "ShopApp/base.html" %}
+ {% load static %}
+{% block title %}  {{ title }} {% endblock %}
+{% block userstyle %}
+    <link rel="stylesheet" href="{% static "ShopApp/css/search.css" %}">
+{% endblock userstyle %}
+
+
+
+
+
+
+
+ {% block content %}
+ 
+  <div id="pad">
+    <h4 class="h4">Category: <strong> {{ name }} </strong> </h4>
+    <hr>
+    <br>
+    <div class="row">
+    {% for item in Ad %}
+        <div class="col-lg-4 col-md-4 col-6 item">
+              <div class="card h-100">
+              
+                <img class="card-img-top" src="{{ item.product_pic0.url }}"  alt="loading..">
+                
+                <div class="card-body">
+                  <h4 class="card-title">
+                   <a href={% url 'ShopApp:detail' pk=item.pk %} style="text-decoration:none;"> {{ item.product_name }}  </a>
+                  </h4>
+                  <h5>Rs. {{ item.price }}</h5>
+                </div>
+                
+               
+              </div>
+
+            </div>
+        {% empty %}
+            <h5 class="h4-2">No results found</h5>
+
+    {% endfor %}
+      </div>
+    </div>
+{% endblock %}

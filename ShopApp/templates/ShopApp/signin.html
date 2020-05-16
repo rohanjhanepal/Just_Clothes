@@ -1,0 +1,47 @@
+
+{% extends "ShopApp/base.html" %}
+<!DOCTYPE html>
+{% load static %}
+{% load bootstrap4 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='slim' %}
+
+
+
+<link rel="stylesheet" type="text/css"  href={% static 'ShopApp/css/sign.css' %}>
+<title>{% block title %}Login{% endblock %}</title>
+
+
+{% block content %}
+
+<div class="container">
+    
+    <div class="pad" style="padding-top: 100px;
+    padding-bottom: 100px;">
+    <div class="row">
+        <div class="col-lg-4 offset-lg-4 col-sm-10 offset-sm-1">
+            <div class="card my-5">
+                <div class="card-header text-center">
+                    <h2>Login</h2>
+                </div>
+                <div class="card-body">
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        {% bootstrap_form form %}
+                    {#    {{ form.as_p }}#}
+                        <input type="submit" class="btn btn-success text-center w-100 mb-3" value="Sign In">
+                        <a href="{% url "ShopApp:signup" %}" class="small">Sign Up</a>
+                        <a href="/" class="float-right small">Home</a>
+                    </form>
+                    <br>
+                    {% bootstrap_messages %}
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+ 
+<br> <br> <br>
+{% endblock content %}

@@ -1,0 +1,64 @@
+.contents {
+    margin: 80px 0px 200px 0px;
+    color: white;
+}
+
+.btns {
+    color: white;
+    font-weight: bold;
+}
+
+.jumbotron {
+    background: linear-gradient(#403A3E, #BE5869);
+}
+
+@media (max-width:992px) {
+    .contents {
+        margin: 80px 0px 60px 0px;
+        font-size: 15px;
+    }
+    .btns {
+        margin-top: 50px;
+    }
+}
+
+.drop {
+    position: absolute;
+    display: inline-block;
+}
+
+
+/* Dropdown Content (Hidden by Default) */
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: linear-gradient(#403A3E, #BE5869);
+    min-width: 160px;
+    z-index: 1;
+}
+
+
+/* Links inside the dropdown */
+
+.dropdown-content button {
+    display: block;
+}
+
+
+/* Change color of dropdown links on hover */
+
+.dropdown-content button:hover {}
+
+
+/* Show the dropdown menu on hover */
+
+.drop:hover .dropdown-content {
+    display: block;
+}
+
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+
+.bu:hover,
+.drop:hover .bu {}
