@@ -1,0 +1,71 @@
+{% extends "ShopApp/base.html" %}
+{% load static %}
+{% load bootstrap4 %}
+{% bootstrap_css %}
+    {% block userstyle %}
+        <link rel="stylesheet" href="{% static "ShopApp/css/myprofile.css" %}">
+    {% endblock userstyle %}
+
+{% block content %}
+
+    <div class="container">
+        <h2> Welcome , {{ user.username }} </h2>
+        {% bootstrap_messages %}
+        <div class="jumbotron">
+            <div class="row">
+
+                <div class="col-lg-6 col-6">
+                    Email: <strong>{{ user.profile.verify_email }}</strong>
+                    <div class="badge badge-secondary" >Non editable</div>
+                </div>
+
+        <!--For each element of user-->
+                <div class="col-lg-6 col-6">
+                    <div class="phone">Phone <strong>{{ user.profile.phone }}</strong> </div> 
+                    <div class="phoneForm" style="display:none;">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input class="form-control mr-sm-2" type="text" name="phone" placeholder="Phone number"> <button type="submit" class="badge badge-success">Done</button>
+                        </form> 
+                    </div> 
+                    <button class="badge badge-dark" value="phone">Edit </button>
+                </div>
+        <!--till here for user-->
+                <div class="col-lg-6 col-6 element">
+                    Deliver to <strong>{{ user.profile.address }},{{ user.profile.street_address }}</strong>
+                    <a class="badge badge-dark" href="{% url "ShopApp:set_drop_location" %}">Edit </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+<script>
+ var edit_toggler = document.querySelectorAll('.badge');
+ edit_toggler.forEach(function(currentBtn){
+  currentBtn.addEventListener('click', handleEditor)
+})
+
+ function handleEditor(){
+     var className =  this.value;
+     var element   =  document.querySelector("." +String(className));
+     var elementForm   =  document.querySelector("." +String(className)+"Form");
+     if(element.style.display=="none"){
+         element.style.display = "block";
+         this.innerHTML = 'Edit';
+         elementForm.style.display = "none";
+     }
+     else{
+        element.style.display = "none";
+        elementForm.style.display = "block";
+        this.innerHTML = 'Cancel';
+     }
+     
+ }
+
+</script>
+
+{% endblock content %}
+

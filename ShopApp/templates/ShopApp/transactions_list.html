@@ -1,5 +1,71 @@
+{% load static %}
+{% load custom_actions %}
+<html>
+<head> <title> </title>
+
+    <link rel="stylesheet" href="{% static "ShopApp/css/bootstrap.min.css" %}">
+    
+
+ </head>
+<body>
+
+
+<div class="container">
+    
+    <div class="row">
+        <div class="col-12">
+            <h4> {{ request.session.activity }} </h4>
+           <h2>
+           <a href="{% url "ShopApp:transact" %}" class="btn btn-info" >No activity</a>
+           <a href="{% url "ShopApp:transact_approved" %}" class="btn btn-info" >Approved</a>
+           <a href="{% url "ShopApp:transact_delivered" %}" class="btn btn-info" >Delivered</a>
+           </h2>
+           
+        
+        </div>
 
 {% for i in transactions %}
-    <h2> {{ i.order_id }} </h2>
-
+    <div class="col-sm-12">
+    <div class="jumbotron">
+    <h2> Name : {{ i.profile.user.username }} </h2>
+    <h3> Email : {{ i.profile.verify_email }} </h3>
+    <h5> Order id: {{ i.order_id }} </h5>
+    <h5> Phone : {{ i.profile.phone }} </h5>
+    <h5> Delivery location: {{ i.profile.address }} , {{ i.profile.street_address }} </h5>
+    <div class="btn-danger">
+    <h5> Products: </h5>
+    <ol>
+        {% for items in i.ordered.items.all %}
+            <li> <a href="{% url "ShopApp:detail" pk=items.product.pk %}" style="text-decoration:none;color:white;" > {{ items.product.product_name }} 
+                <div class="badge badge-dark">(size:{{ items.selected_size }}) </div>
+                </a>
+            </li>
+        {% endfor %}
+    </ol>
+    </div>
+    <h4>total price: {{ i.ordered.get_cart_total }} + 50 = {{ i.ordered.get_cart_total|add:'50' }} </h4>
+        <div class="btn-primary"><h5>Date of order:</h5> <h5> {{ i.ordered.date_ordered }}</h5> </div>
+        <br>
+        <div class="row">
+            <div class="col-3">
+                <a href="{% url "ShopApp:delete_transaction_item" pk=i.pk %}" class="btn btn-danger">Delete</a>
+            </div>
+            <div class="col-3">
+                <a href="{% url "ShopApp:delivered" pk=i.pk %}" class="btn btn-warning">Delivered</a>
+            </div>
+            <div class="col-3">
+                <a href="{% url "ShopApp:approve_order" pk=i.pk %}" class="btn btn-success">Approve</a>
+            </div>
+            <div class="col-3">
+                <a href="{% url "ShopApp:deny_order" pk=i.pk %}" class="btn btn-danger">Deny</a>
+            </div>
+        </div>
+    </div><!--jumbotron-->
+    </div><!--column-->
+    
 {% endfor %}
+</div> <!--row-->
+</div><!--container-->
+
+</body>
+</html>

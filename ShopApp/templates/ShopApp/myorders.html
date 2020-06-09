@@ -1,0 +1,82 @@
+{% extends 'ShopApp/base.html' %}
+{% load static %}
+{% load bootstrap4 %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='slim' %}
+{% block title %}Footpath|My orders{% endblock title %}
+
+
+
+{% block content %}
+<div class="container">
+    <div class='row'>
+        
+        <div class='col-6'>
+            <button id='delivered_btn' class="btn btn-dark">Switch to Delivered</button>
+        </div>
+    </div>
+    <!--Ordered-->
+    <div id="ordered" style="display:block;">
+        <h1> Ordered </h1>
+    {% for order in ordered %}
+        <div class='jumbotron bg-dark'>
+            {% for item in order.ordered.items.all %}
+                
+                <p> <a href="{% url 'ShopApp:detail' pk=item.product.id %}" class="text-light">{{ item.product.product_name }} </a> </p> 
+               
+            {% endfor %}
+            <a href="{% url 'ShopApp:delete_order' pk=order.pk %}" class= "btn btn-danger">Cancel </a>
+        </div>
+    {% empty %}
+        <h5> No orders </h5>
+    {% endfor %}
+    </div>
+    <!--end of order-->
+    <!--Delivered-->
+    <div id="delivered" style="display:none">
+     <h1> Delivered </h1>
+    {% for order in delivered %}
+        <div class='jumbotron bg-dark'>
+            {% for item in order.ordered.items.all %}
+                
+                <p> <a href="{% url 'ShopApp:detail' pk=item.product.id %}" class="text-light">{{ item.product.product_name }} </a> </p> 
+               
+            {% endfor %}
+            
+        </div>
+    {% empty %}
+        <h5> Nothing delivered yet. </h5>
+    {% endfor %}
+    </div>
+    <!--end of delivered-->
+</div>
+{% endblock content %}
+
+
+{% block userscript %}
+    <script>
+        var tog = 0;
+        var delivered = document.getElementById('delivered');
+        var ordered = document.getElementById('ordered');
+        $('#delivered_btn').click(
+            function(){
+                if(tog==0){
+                    //switch to delivered
+                    tog=1;
+                    delivered.style.display = "block";
+                    ordered.style.display = "none";
+                    $('#delivered_btn').html("Switch to ordered");
+
+                }
+                else{
+                    tog=0;
+                    delivered.style.display = "none";
+                    ordered.style.display = "block";
+                    $('#delivered_btn').html("Switch to delivered");
+                }
+            }
+        )
+
+    </script>
+
+{% endblock userscript %}

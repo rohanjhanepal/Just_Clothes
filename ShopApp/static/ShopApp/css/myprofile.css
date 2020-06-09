@@ -1,0 +1,12 @@
+.jumbotron {
+    background: linear-gradient(#403A3E, #BE5869);
+    color: white;
+}
+
+button {
+    border: none;
+}
+
+.element {
+    margin: 20px 0px 0px 0px;
+}

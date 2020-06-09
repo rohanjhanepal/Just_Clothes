@@ -37,7 +37,7 @@ class SignupForm(UserCreationForm):
         
         
 class AddressForm(forms.ModelForm):
-    
+   
     class Meta():
         model = models.DropLocation
         fields = ["address" , "street_address"]
@@ -46,3 +46,11 @@ class AddressForm(forms.ModelForm):
             'address' :forms.TextInput(attrs ={'placeholder':'example: Shankhamul, New Baneshwor, Kathmandu'})  ,
             'street_address' :forms.TextInput(attrs ={'placeholder':'example: janekta marg'}) 
         }
+    def clean(self):
+        all = super().clean()
+        address = all['address']
+        street_address = all['street_address']
+        
+        if address==None or street_address==None:
+            raise forms.ValidationError("Dont leave any fields empty")
+            

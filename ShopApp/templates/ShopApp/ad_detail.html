@@ -18,23 +18,29 @@
           <!---<img class="img-fluid" src="{{ ad.product_pic.url }}" alt=""> -->
             <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
       <ol class="carousel-indicators">
-        <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-        <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-        <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+        
       </ol>
     <div class="carousel-inner">
+    {% if ad.product_pic0 %}
     <div class="carousel-item active">
       <img class="d-block w-100 img-fluid" id="myimage0" src="{{ ad.product_pic0.url }}" alt="First slide">
     </div>
+    {% endif %}
+    {% if ad.product_pic1 %}
     <div class="carousel-item">
       <img class="d-block w-100 img-fluid" id="myimage1" src="{{ ad.product_pic1.url }}" alt="Second slide">
     </div>
+    {% endif %}
+    {% if ad.product_pic2 %}
     <div class="carousel-item">
       <img class="d-block w-100 img-fluid" id="myimage2" src="{{ ad.product_pic2.url }}" alt="Error">
     </div>
+    {% endif %}
+    {% if ad.product_pic3 %}
     <div class="carousel-item">
       <img class="d-block w-100 img-fluid" id="myimage3" src="{{ ad.product_pic3.url }}" alt="Error">
     </div>
+    {% endif %}
   </div>
   <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -50,19 +56,20 @@
         <div class="col-md-4">
           <h3 class="my-3">{{ ad.product_name }}</h3>
           <p>{{ ad.description }}</p>
-          <h3 class="my-3">Project Details</h3>
           <ul>
-            <li>Lorem Ipsum</li>
-            <li>Dolor Sit Amet</li>
-            <li>Consectetur</li>
-            <li>Adipiscing Elit</li>
+            <li>Available sizes: {{ ad.sizes_available }}</li>
+            <li>Brand: {{ ad.product_brand }}</li>
+            <li class="links">Category:<a href="{% url "ShopApp:category_view" ad.category.pk %}" > {{ ad.category }}</a></li>
+            {% if stock_finish %} <li class="btn btn-danger"> Sorry,but this item is out of stock </li> {% endif %}
           </ul>
+          {% if stock_finish == False %}
           {% if user.is_authenticated %}
            <form action="{% url "ShopApp:cart" pk=ad.pk %}">
                 <input type="submit" class="btn btn-warning" value="Add to cart">
             </form>
           {% else %}
             <a href="{% url "ShopApp:signin" %}" class="small">Sign In</a> or <a href="{% url "ShopApp:signup" %}" class="small">Sign Up</a> to buy.
+          {% endif %}
           {% endif %}
         </div>
     </div>
@@ -73,9 +80,11 @@
 
 
  <!-- FOR related content-->
+ 
  <div class="row">
  {% for item in related_category %}
-    <div class="col-lg-4 col-md-4 col-6 item">
+  {% if item.pk != ad.pk %}
+    <div class="col-lg-4 col-md-4 col-6 item px-0 mb-4">
               <div class="card h-100">
               
                 <img class="card-img-top" src="{{ item.product_pic0.url }}"  alt="loading..">
@@ -91,11 +100,10 @@
               </div>
 
             </div>
-            
+  {% endif %}     
 {% endfor %}
+
 </div>
-
-
 
 
 

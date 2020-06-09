@@ -10,17 +10,15 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 
+import PIL
 from PIL import Image
-from io import BytesIO
+from io import BytesIO ,StringIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.utils.six import StringIO
 
 
-class Sizes(models.Model):
-    size = models.CharField(max_length=20)
-    
-    def __str__(self):
-        return self.size
     
 class Category(models.Model):
     categories = models.CharField(max_length=200 , unique=True)
@@ -51,8 +49,10 @@ class Ad(models.Model):
     description = models.TextField()
     product_brand = models.CharField(max_length=250 , default='None')
     sizes_available = models.CharField(max_length = 200 , default = 'XL L M')
-    sizes = models.ManyToManyField(Sizes ,blank=True , null=True)
-    #sizes_available = models.CharField(max_length = 20 , choices=['XXL':'XXL','XL':'XL' , 'L':'L' , 'M':'M' , 'S':'S'])    
+
+    stock = models.IntegerField(max_length = 100 , default = 1 , blank = True , null = True)
+    
+    
     product_pic0 = models.ImageField(blank=True , null=True, upload_to = 'images/%Y/%m/%d/')
     product_pic1 = models.ImageField(blank=True , null=True, upload_to = 'images/%Y/%m/%d/')
     product_pic2 = models.ImageField(blank=True , null=True, upload_to = 'images/%Y/%m/%d/')
@@ -70,42 +70,36 @@ class Ad(models.Model):
     
     def get_absolute_url(self):
         return reverse("ad_detail", kwargs={"pk": self.pk})
-    '''
+    
     def save(self):
-		#Opening the uploaded image
-        
-		im = Image.open(self.product_pic0)
-        im1 = Image.open(self.product_pic1)
-        im2 = Image.open(self.product_pic2)
-        im3 = Image.open(self.product_pic3)
-		output = BytesIO()
-
-		#Resize/modify the image
-		im = im.resize((160,300),img.ANTIALIAS)
-        im1 = im1.resize((160,300),img.ANTIALIAS)
-        im2 = im2.resize((160,300),img.ANTIALIAS)
-        im3 = im3.resize((160,300),img.ANTIALIAS)
-        
-
-		#after modifications, save it to the output
-		im.save(output, format='JPEG', quality=40)
-        im1.save(output, format='JPEG', quality=40)
-        im2.save(output, format='JPEG', quality=40)
-        im3.save(output, format='JPEG', quality=40)
-		output.seek(0)
-
-		#change the imagefield value to be the newley modifed image value
-		self.img = InMemoryUploadedFile(output,'ImageField', "%s.jpg" %self.img.name.split('.')[0], 'image/jpeg', sys.getsizeof(output), None)
-
-		super(Modify,self).save()
-        '''
-
+        if (self.product_pic0):
+            self.product_pic0 = self.ModifyImage(self.product_pic0)
+        if (self.product_pic1):
+            self.product_pic1 = self.ModifyImage(self.product_pic1)
+        if (self.product_pic2):
+            self.product_pic2 = self.ModifyImage(self.product_pic2)
+        if (self.product_pic3):
+            self.product_pic3 = self.ModifyImage(self.product_pic3)
+        super().save()
+  
+    def ModifyImage(self ,product_pic):
+        im = Image.open(product_pic)
+        output = BytesIO()
+        im = im.resize((600,380),PIL.Image.ANTIALIAS)
+        im.save(output, format='JPEG', quality=80)
+        output.seek(0)
+        product_pic = InMemoryUploadedFile(output,'ImageField', "%s.jpg" %product_pic.name.split('.')[0], 'image/jpeg', sys.getsizeof(output), None)
+        return product_pic
+    
     
 class Profile(models.Model):
      user = models.OneToOneField(User, on_delete=models.CASCADE , blank=True,null=True)
      verify_email = models.EmailField(null=True , blank=True)
      phone = models.IntegerField(null=True)
      location = models.CharField(max_length=50, blank=True)
+     
+     address = models.CharField(max_length = 200, null=True , blank=True)
+     street_address = models.CharField(max_length=200 , null=True , blank=True)
      
      def __str__(self):
          return self.user.username
@@ -131,7 +125,7 @@ def update_profile_signal(sender, instance, created, **kwargs):
 class OrderItem(models.Model):
     product = models.OneToOneField(Ad, on_delete=models.SET_NULL, null=True)
     is_ordered = models.BooleanField(default=False)
-    selected_size = models.CharField(max_length=20,null=True , blank=True)
+    selected_size = models.CharField(max_length=20,null=True , blank=True , default = 'None')
     date_added = models.DateTimeField(auto_now=True)
     date_ordered = models.DateTimeField(null=True)
 
@@ -162,17 +156,46 @@ class Order(models.Model):
     
     
 class Transactions(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE , related_name = 'transactions')
     order_id = models.CharField(max_length=120)
     ordered = models.OneToOneField(Order, on_delete=models.SET_NULL, null=True)
     
     order_quantity = models.IntegerField(blank=True, null=True)
     amount = models.DecimalField(max_digits=100, decimal_places=2)
     success = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
     transact_date = models.DateTimeField(default= timezone.now)
 
     def __str__(self):
-        return self.order_id
+        return str(self.transact_date)
 
     class Meta:
         ordering = ['-transact_date']
+        
+        
+        
+        
+        
+class Frontal_images(models.Model):
+    frontal_image = models.ImageField(blank=True , null=True, upload_to = 'images/frontal_images/')
+    
+    def save(self, *args, **kwargs):
+        # Do extra stuff before saving
+ 
+        # If new post, get the frontal_image and resize it on the fly
+        
+        img = Image.open(self.frontal_image)
+        output = BytesIO()
+        
+        img.save(output, format='JPEG', quality=40)
+        output.seek(0)
+        
+        self.frontal_image = InMemoryUploadedFile(output,'ImageField', "%s.jpg" %self.frontal_image.name.split('.')[0], 'image/jpeg', sys.getsizeof(output), None)
+
+        super().save(*args, **kwargs)
+    
+    
+    def __str__(self):
+        return self.frontal_image.url
+    
+    

@@ -18,7 +18,8 @@
          
         <div class="jumbotron">
            
-           <h6>  {{ it.owner }}, would you wanna checkout and get delivered to {{ it.owner.location }} </h6>
+           <h8> Get delivered to <span class="badge badge-secondary">{{ it.owner.address }} , {{ it.owner.street_address }}</span> </h8><br>
+            <h8> or <a href="{% url "ShopApp:set_drop_location" %}" class="badge badge-dark"> change delivery address </a>
             <br>
             
             {% for item in it.items.all %}
@@ -34,9 +35,9 @@
                                 Size
                         </a>
                             <div class="dropdown-content">
-                        {% for si in size  %}
+                        {% for si in item.product.sizes_available|str_to_list %}
                                
-                                <button class="btn btn-dark bu" value="{{ si.size }}" type="submit" name="size" class="btns">{{ si.size }}</button>
+                                <button class="btn btn-dark bu" value="{{ si }}" type="submit" name="size" class="btns">{{ si }}</button>
                               
                         {% endfor %}
                             </div>
@@ -50,8 +51,9 @@
                 <hr>
                 
                 {% empty %}
-                   
-                    <h2> oops ,No items in cart </h2>
+                    <br>
+                    <h3> Oops, no items in cart </h3>
+                    <p> Please add to cart to buy </p>
             {% endfor %}
                 
             <br><br>

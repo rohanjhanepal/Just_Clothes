@@ -120,3 +120,30 @@
   </body>
 
 </html>
+
+
+
+
+
+{% if Ad.has_other_pages %}
+  <ul class="pagination">
+    {% if Ad.has_previous %}
+      <li><a href="?page={{ Ad.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in Ad.paginator.page_range %}
+      {% if Ad.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if Ad.has_next %}
+      <li><a href="?page={{ Ad.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %}
+

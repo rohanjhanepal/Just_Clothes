@@ -6,12 +6,14 @@ from django.contrib.auth.models import User
 from django.urls import reverse_lazy ,reverse
 from django.contrib.auth.decorators import login_required ,user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.utils.decorators import method_decorator
 #from .extras import generate_order_id
 from django.http import HttpResponseRedirect
 #from rest_framework.decorators import api_view
 #from rest_framework.response import Response
 
-from django.views.generic import DetailView , ListView ,  TemplateView  
+from django.views.generic import DetailView , ListView ,  TemplateView ,DeleteView
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from . import models
 
@@ -23,6 +25,10 @@ from datetime import date
 import datetime
 import braintree
 
+@user_passes_test(lambda u: u.is_superuser)
+def SuperSuper(request):
+    request.session['SuperSuper'] = "True"
+    
 def get_user_pending_order(request):
     # get order for the correct user
     user_profile = get_object_or_404(models.Profile, user=request.user)
@@ -37,14 +43,30 @@ def generate_order_id():
     rand_str = "".join([random.choice(string.digits) for count in range(3)])
     return date_str + rand_str
 
-class HomeListView(TemplateView):
+def HomeListView(request):
     template_name = 'ShopApp/index.html'
-    paginate_by = 5
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['Ad'] = models.Ad.objects.filter(active=True).order_by('-published_date')
-        context['category']= models.Category.objects.all()
-        return context
+    paginate_by = 2
+    
+    
+    page = request.GET.get('page', 1)
+    
+    context = {}
+        
+    #context['Ad'] = models.Ad.objects.filter(active=True , featured=True).order_by('-published_date')
+    context['category']= models.Category.objects.all()
+    context['frontal_images'] = models.Frontal_images.objects.all()
+        
+        
+    ad = models.Ad.objects.filter(active=True , featured=True).order_by('-published_date')
+    paginator = Paginator(ad, 2)
+    try:
+        advertise = paginator.page(page)
+    except PageNotAnInteger:
+        advertise = paginator.page(1)
+    except EmptyPage:
+        advertise = paginator.page(paginator.num_pages)
+    context['Ad'] = advertise
+    return render(request, template_name , context = context)
     
 class AdDetailView(DetailView):
     model = models.Ad
@@ -55,6 +77,13 @@ class AdDetailView(DetailView):
         
         ads = models.Ad.objects.filter(id= self.kwargs.get('pk')).first()
         related_category = models.Category.objects.filter(categories__icontains=ads.category.categories)[0].advertisements.all()
+        #for size:
+        stock_number = ads.stock
+        if(stock_number > 0):
+            context['stock_finish'] = False
+        else:
+            context['stock_finish'] = True
+        
         
         context['related_category'] = related_category[0:4]
         
@@ -100,9 +129,11 @@ def SignInView(request):
             user = authenticate(request, username=username,  password=password)
             if user is not None:
                 login(request, user)
-                order_cart=get_user_pending_order(request)
-                for i in order_cart:
-                    request.session['count'] +=1
+                try:
+                    SuperSuper(request)
+                except:
+                    request.session['SuperSuper'] = "False"
+                
                 messages.success(request, "Successfully logged in")
                 inital = {"items":[],"price":0.0,"count":0}
                 
@@ -111,7 +142,8 @@ def SignInView(request):
             else:
                 messages.error(request, "Invalid Username or Password")
     return render(request , 'ShopApp/signin.html' , context = {'form':form})
-     
+
+
             
 @login_required()
 def signout(request):
@@ -121,7 +153,7 @@ def signout(request):
 
 @login_required()
 def add_to_cart(request, **kwargs):
-    request.session['count']+=1
+    
     # get the user profile
     user_profile = get_object_or_404(models.Profile, user=request.user)
     # filter products by id
@@ -151,7 +183,7 @@ def mycart(request, **kwargs):
     empty = request.session.get('empty', 0)
     request.session['empty'] = 0
     #existing_order = get_user_pending_order(request)
-    size = models.Sizes.objects.all()
+   
     user_profile = get_object_or_404(models.Profile, user=request.user)
     order = models.Order.objects.filter(owner=user_profile, is_ordered=False)
     if len(order)==0:
@@ -168,7 +200,7 @@ def mycart(request, **kwargs):
 
     context = {
         'it': order[0] ,
-        'size':size ,
+        
         #'price' :prices
     }
     return render(request, 'ShopApp/cart_list.html', context)
@@ -198,10 +230,13 @@ def set_size(request ,**kwargs):
     size = request.GET["size"]
     user = get_object_or_404(models.Profile, user=request.user)
     order = models.OrderItem.objects.filter(id = kwargs.get('pk'))[0]
-    
-    order.selected_size = size
-    order.save()
-    messages.success(request, "size set to {}".format(size))
+    ad = models.Ad.objects.filter(id=order.product.pk)[0]
+    if(size in ad.sizes_available):
+        order.selected_size = size
+        order.save()
+        messages.success(request, "size set to {}".format(size))
+    else:
+        messages.error(request, "{} size not available. Please select among {}".format(size,ad.sizes_available))
     return redirect(reverse('ShopApp:my_cart'))
 
 
@@ -218,7 +253,8 @@ def CategoryListView(request , **kwargs):
 @login_required() 
 def SetDropLocation(request):
     form = forms.AddressForm()
-    user = get_object_or_404(models.Profile, user=request.user)
+    userr = get_object_or_404(models.Profile, user=request.user)
+    user = request.user
     
     if request.method == "POST":
         form = forms.AddressForm(request.POST)
@@ -226,7 +262,10 @@ def SetDropLocation(request):
         if form.is_valid():
             us = form.save()
             us.refresh_from_db()
-            us.user = user
+            us.user = userr
+            user.profile.street_address = form.cleaned_data.get('street_address')
+            user.profile.address = form.cleaned_data.get('address')
+            user.profile.save()
             us.save()
             messages.success(request , "Saved")
             return redirect("ShopApp:my_cart")
@@ -240,6 +279,15 @@ def SetDropLocation(request):
 def PlaceOrder(request, **kwargs):
     
     order = models.Order.objects.filter(id = kwargs.get('pk'))[0]
+    items = order.items.all()
+    for i in items:
+        if(i.selected_size == 'None'):
+            messages.error(request , "Please choose sizes for all the items")
+            return redirect("ShopApp:detail" , kwargs.get('pk'))
+    for i in items:
+        i.product.stock = i.product.stock - 1
+        i.product.save()
+    
     order.is_ordered = True
     order.save()
     transaction = models.Transactions(
@@ -256,11 +304,96 @@ def PlaceOrder(request, **kwargs):
     
 @user_passes_test(lambda u: u.is_superuser)
 def TransactionListView(request):
-    model = models.Transactions.objects.all()
-    
+    model = models.Transactions.objects.filter(approved=False,success=False)
+    request.session['activity'] = "Transactions"
     return render(request , "ShopApp/transactions_list.html" , context ={'transactions':model})
     
-        
-        
+@user_passes_test(lambda u: u.is_superuser)
+def TransactionListViewApproved(request):
+    model = models.Transactions.objects.filter(approved=True,success=False)
+    request.session['activity'] = "Approved Transactions"
+    return render(request , "ShopApp/transactions_list.html" , context ={'transactions':model})
+
+@user_passes_test(lambda u: u.is_superuser)
+def TransactionListViewDelivered(request):
+    model = models.Transactions.objects.filter(success=True)
+    request.session['activity'] = "Delivered Transactions"
+    return render(request , "ShopApp/transactions_list.html" , context ={'transactions':model})
+
+@user_passes_test(lambda u: u.is_superuser)
+def Approve(request , **kwargs):
+    model = models.Transactions.objects.filter(id=kwargs.get('pk'))[0]
+    model.approved = True
+    model.save()
+    
+    return redirect("ShopApp:transact_approved")
+
+@user_passes_test(lambda u: u.is_superuser)
+def Delivered(request , **kwargs):
+    model = models.Transactions.objects.filter(id=kwargs.get('pk'))[0]
+    model.success = True
+    model.save()
+    
+    return redirect("ShopApp:transact")
+@user_passes_test(lambda u: u.is_superuser)
+def Deny_Order(request , **kwargs):
+    order = models.Transactions.objects.filter(id = kwargs.get('pk'))[0]
+    item = order.ordered.items.all()
+    for i in item:
+        i.product.stock = i.product.stock + 1
+        i.product.save()
+    order.delete()
+    return redirect("ShopApp:transact")
+
+class OrderDeleteView(DeleteView):
+    model = models.Transactions
     
     
+    
+    def get_success_url(self):
+        return reverse("ShopApp:transact_delivered")
+    
+    
+@login_required()
+def MyProfile(request):
+    user = request.user
+    
+    if request.method == "POST":
+        
+        if(request.POST['phone']):
+            passed_key = request.POST['phone']
+            if((len(str(passed_key)) != 10) or str(passed_key)[0] !='9' or str(passed_key)[1] !='8'):
+                messages.error(request , "Please enter a valid phone number")
+            else:
+                user.profile.phone = passed_key
+                user.profile.save()
+                user.save()
+                messages.success(request , "Phone number modified")
+   
+    
+    context = {
+        'user':user ,
+    }
+    return render(request, "ShopApp/myprofile.html" , context=context)
+
+def myorders(request):
+    user = get_object_or_404(models.Profile , user = request.user)
+    
+    ordered = user.transactions.filter(success=False , approved=False)
+    delivered = user.transactions.filter(success=True)
+    
+    context = {
+        'ordered' : ordered , 
+        'delivered' :delivered
+    }
+    
+    return render(request , 'ShopApp/myorders.html' , context = context)
+    
+def Delete_Order(request , **kwargs):
+    order = models.Transactions.objects.filter(id = kwargs.get('pk'))[0]
+    item = order.ordered.items.all()
+    for i in item:
+        i.product.stock = i.product.stock + 1
+        i.product.save()
+    order.delete()
+    return redirect("ShopApp:myorders")
