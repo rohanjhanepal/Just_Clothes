@@ -1,0 +1,60 @@
+.contain {
+    padding-top: 20px;
+    padding-bottom: 100px;
+}
+
+.links a {
+    text-decoration: none;
+    color: rgb(85, 85, 201);
+}
+
+ul {
+    list-style: none;
+}
+
+.comments .tip {
+    width: 0px;
+    height: 0px;
+    position: absolute;
+    background: transparent;
+    border: 10px solid #ccc;
+}
+
+.comments .tip-up {
+    top: 10px;
+    left: -25px;
+    border-top-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.comments .dialogbox .bodye {
+    position: relative;
+    max-width: 300px;
+    height: auto;
+    margin: 20px 10px;
+    padding: 5px;
+    background-color: #DADADA;
+    border-radius: 3px;
+    border: 5px solid #ccc;
+}
+
+.comments .bodye .message {
+    min-height: 30px;
+    border-radius: 3px;
+    font-family: Arial;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgb(51, 50, 50);
+}
+
+.comments {
+    background: linear-gradient(rgba(204, 204, 204, 0.151), rgba(145, 145, 142, 0.116));
+    padding: 10px 0px 10px 10px;
+    margin: 20px 0px 20px 0px;
+}
+
+.dialogtitle {
+    font-weight: 400px;
+    color: #797979;
+}

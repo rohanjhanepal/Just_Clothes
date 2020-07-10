@@ -9,7 +9,7 @@ from django.contrib.auth.models import User , AbstractUser
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
-
+import os
 import PIL
 from PIL import Image
 from io import BytesIO ,StringIO
@@ -19,7 +19,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.utils.six import StringIO
 
 
-    
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 class Category(models.Model):
     categories = models.CharField(max_length=200 , unique=True)
     
@@ -93,7 +94,7 @@ class Ad(models.Model):
     
     
 class Profile(models.Model):
-     user = models.OneToOneField(User, on_delete=models.CASCADE , blank=True,null=True)
+     user = models.OneToOneField(User, on_delete=models.CASCADE , blank=True,null=False  )
      verify_email = models.EmailField(null=True , blank=True)
      phone = models.IntegerField(null=True)
      location = models.CharField(max_length=50, blank=True)
@@ -154,7 +155,6 @@ class Order(models.Model):
     
     
     
-    
 class Transactions(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE , related_name = 'transactions')
     order_id = models.CharField(max_length=120)
@@ -198,4 +198,17 @@ class Frontal_images(models.Model):
     def __str__(self):
         return self.frontal_image.url
     
+    def delete(self, *args, **kwargs):
+        self.frontal_image.delete()
+        super().delete(*args , **kwargs)
     
+class Comments(models.Model):
+    profile = models.ForeignKey(Profile , on_delete=models.CASCADE )
+    product = models.OneToOneField(Ad , on_delete=models.CASCADE , related_name='comments')
+        
+    text = models.CharField(max_length = 256)
+    time = models.DateTimeField(default= timezone.now)
+    def __str__(self):
+        return '{}'.format(self.product.product_name)
+        
+        

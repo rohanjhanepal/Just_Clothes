@@ -6,7 +6,7 @@ app_name = 'ShopApp'
 urlpatterns = [
     
     path('',views.HomeListView , name='home'),
-    path(r'^ad/<str:pk>/$' , views.AdDetailView.as_view() , name='detail'),
+    path(r'^ad/<str:pk>/$' , views.AdDetailView , name='detail'),
     path('signup/' , views.SignUpView , name='signup') , 
     path('signin/' , views.SignInView , name='signin') , 
     path('signout/', views.signout, name="signout") ,

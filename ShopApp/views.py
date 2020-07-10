@@ -68,26 +68,68 @@ def HomeListView(request):
     context['Ad'] = advertise
     return render(request, template_name , context = context)
     
-class AdDetailView(DetailView):
-    model = models.Ad
+def AdDetailView(request , **kwargs):
+    model = models.Ad.objects.filter(id=kwargs.get('pk')).first()
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['category']= models.Category.objects.all()
+    deliver_chk = False
+    context = {}
+    coment =None
+    #------------------comments-------------
+    try:
         
-        ads = models.Ad.objects.filter(id= self.kwargs.get('pk')).first()
-        related_category = models.Category.objects.filter(categories__icontains=ads.category.categories)[0].advertisements.all()
+        delivered = get_object_or_404(models.Profile , user = request.user).transactions.filter(success=True)[0].ordered.items.filter(product=model)[0]
+        if delivered:
+            deliver_chk = True
+    
+    
+        comments = models.Comments.objects.filter(product = model )
+        coment = comments
+    except:
+        pass
+    
+    if request.method == "POST":
+        user_profile = get_object_or_404(models.Profile, user= request.user)
+        comm = request.POST["mycomment"]
+        commentmodel = None
+        try:
+            commentmodel = models.Comments(profile = user_profile,
+            product = model)
+            commentmodel.text = comm
+            commentmodel.save()
+        except:
+            
+            if(commentmodel != None):
+                #commentmodel = models.Comments.objects.filter(profile = user_profile ,product = model)
+                commentmodel = get_object_or_404(models.Comments ,profile = user_profile ,product = model )
+                commentmodel.text = comm
+                commentmodel.save()
+            
+        
+        
+    
+    #---------------comments end -------------
+    ads = models.Ad.objects.filter(id= kwargs.get('pk')).first()
+    related_category = models.Category.objects.filter(categories__icontains=ads.category.categories)[0].advertisements.all()
         #for size:
-        stock_number = ads.stock
-        if(stock_number > 0):
-            context['stock_finish'] = False
-        else:
-            context['stock_finish'] = True
+    stock_number = ads.stock
+    if(stock_number > 0):
+        stock_finish = False
+    else:
+        stock_finish = True
         
         
-        context['related_category'] = related_category[0:4]
+    
+    context = {
+        'ad': model ,
+        'category':models.Category.objects.all() , 
+        'related_category':related_category[0:4] ,
+        'stock_finish' :stock_finish ,
+        'delivered' : deliver_chk ,
+        'comments'  :coment,
         
-        return context
+    }
+        
+    return render(request , 'ShopApp/ad_detail.html' , context = context)
     
     
 def SignUpView(request):

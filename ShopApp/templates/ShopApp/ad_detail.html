@@ -4,10 +4,10 @@
 
 {% bootstrap_css %}
 {% bootstrap_javascript jquery='slim' %}
-{% block title %} {{ ad.product_name }} {% endblock  %}
+{% block title %}{{ ad.product_name }}{% endblock  %}
 
 {% block userstyle %}
-    <link href="{% static "ShopApp/css/detail.css" %}" rel="stylesheet">
+    <link href="{% static "ShopApp/css/ad_detail.css" %}" rel="stylesheet">
 {% endblock userstyle %}
 
 {% block content %}
@@ -57,15 +57,16 @@
           <h3 class="my-3">{{ ad.product_name }}</h3>
           <p>{{ ad.description }}</p>
           <ul>
+            <li>Price: Rs.{{ ad.price }}</li>
             <li>Available sizes: {{ ad.sizes_available }}</li>
             <li>Brand: {{ ad.product_brand }}</li>
-            <li class="links">Category:<a href="{% url "ShopApp:category_view" ad.category.pk %}" > {{ ad.category }}</a></li>
+            <li class="links">Category:<a href="{% url "ShopApp:category_view" ad.category.pk %}" > {{ ad.category }}</a>/{{ ad.subcategory }}</li>
             {% if stock_finish %} <li class="btn btn-danger"> Sorry,but this item is out of stock </li> {% endif %}
           </ul>
           {% if stock_finish == False %}
           {% if user.is_authenticated %}
            <form action="{% url "ShopApp:cart" pk=ad.pk %}">
-                <input type="submit" class="btn btn-warning" value="Add to cart">
+                <input type="submit" class="btn btn-outline-warning" value="Add to cart">
             </form>
           {% else %}
             <a href="{% url "ShopApp:signin" %}" class="small">Sign In</a> or <a href="{% url "ShopApp:signup" %}" class="small">Sign Up</a> to buy.
@@ -74,13 +75,50 @@
         </div>
     </div>
     <hr>
+    <!--comment boxes system-->
     
+    <div class="comments">
+    <h3 style="font-weight:200px;" class="text-muted"> Comments </h3>
+    {% if delivered %}
+      <form action="{% url "ShopApp:detail" pk=ad.pk %}" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        <div class="row">
+       <div class="col-sm-12 col-lg-6"><input type="text" name="mycomment" placeholder="any thought on product?" class="form-control-lg" style="padding-right:100px;"></div> 
+       <div class="col-sm-12 col-lg-2"><button type="submit" class="btn btn-outline-secondary">Publish</button>
+      </div>
+      </div>
+      </form>
+      <hr>
+    {% endif %}
+    
+      
+  {% for comment in comments %}
+  <div class="dialogbox">
+    <div class="bodye">
+      <span class="tip tip-up"></span>
+      <div class="message">
+        <div class="dialogtitle">By {{ comment.profile.user.username }},on {{ comment.time }} </div>
+        <span>{{ comment.text }}</span>
+      </div>
+    </div>
+  {% empty %}
+      <hr>
+     <h5 style="font-weight:200px;" class="text-muted"> No comments yet </h5>
+  {% endfor %}
+  
+      
+      
+
+
+    </div>
+    <!--comment boxes ending-->
   </div>
         
 
 
  <!-- FOR related content-->
- 
+ <h5 style="font-weight:200px;" class="text-muted"> You may also like: </h5>
  <div class="row">
  {% for item in related_category %}
   {% if item.pk != ad.pk %}

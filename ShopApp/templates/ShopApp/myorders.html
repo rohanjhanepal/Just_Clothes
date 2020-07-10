@@ -1,5 +1,6 @@
 {% extends 'ShopApp/base.html' %}
 {% load static %}
+{% load custom_actions %}
 {% load bootstrap4 %}
 {% bootstrap_css %}
 {% bootstrap_javascript jquery='slim' %}
@@ -9,15 +10,15 @@
 
 {% block content %}
 <div class="container">
-    <div class='row'>
+    
         
         <div class='col-6'>
             <button id='delivered_btn' class="btn btn-dark">Switch to Delivered</button>
         </div>
-    </div>
+    <hr>
     <!--Ordered-->
     <div id="ordered" style="display:block;">
-        <h1> Ordered </h1>
+        <h3> Ordered </h3>
     {% for order in ordered %}
         <div class='jumbotron bg-dark'>
             {% for item in order.ordered.items.all %}
@@ -25,6 +26,9 @@
                 <p> <a href="{% url 'ShopApp:detail' pk=item.product.id %}" class="text-light">{{ item.product.product_name }} </a> </p> 
                
             {% endfor %}
+            <p class="text-muted"> Total price: {{ order.amount|add:'50' }} (inc delivery) </p>
+            <p class="text-muted"> Date: {{ order.ordered.date_ordered }}</p>
+            <hr>
             <a href="{% url 'ShopApp:delete_order' pk=order.pk %}" class= "btn btn-danger">Cancel </a>
         </div>
     {% empty %}
@@ -34,15 +38,16 @@
     <!--end of order-->
     <!--Delivered-->
     <div id="delivered" style="display:none">
-     <h1> Delivered </h1>
+     <h3> Delivered </h3>
     {% for order in delivered %}
         <div class='jumbotron bg-dark'>
             {% for item in order.ordered.items.all %}
                 
-                <p> <a href="{% url 'ShopApp:detail' pk=item.product.id %}" class="text-light">{{ item.product.product_name }} </a> </p> 
-               
+                <p><a href="{% url 'ShopApp:detail' pk=item.product.id %}" class="text-light">{{ item.product.product_name }} </a> </p> 
+
             {% endfor %}
-            
+            <p class="text-muted"> Total price: {{ order.amount|add:'50' }} (inc delivery) </p>
+            <p class="text-muted"> Date: {{ order.ordered.date_ordered }}</p>
         </div>
     {% empty %}
         <h5> Nothing delivered yet. </h5>
